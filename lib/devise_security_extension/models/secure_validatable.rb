@@ -61,9 +61,23 @@ module Devise
 
       protected
 
-      # validates :password, :format => { :with => password_regex, :message => :password_format }
+      # Allow to validate single regex as :
+      #   config.password_regex = /[a-z]/
+      #   I18n error message : active_record.messages.password_length
+      #
+      # or with multiple regexp and its regexp name (useful for error message)
+      #
+      #   config.password_regex = { should_have_mixed_case_letters: /(?=.*[a-z])(?=.*[A-Z])/, should_have_digits: /(?=.*\d)/ }
+      #   I18n error message : active_record.messages.should_have_mixed_case_letters, active_record.messages.should_have_digits
+      #
       def password_format_should_be_valid
-        errors.add(:password, :password_format) unless password =~ self.class.password_regex
+        if (regex = self.class.password_regex).is_a? Regexp
+          errors.add(:password, :password_format) unless password =~ regex
+        else
+          regex.each do |name, exp|
+            errors.add(:password, name.to_sym) unless password =~ exp
+          end
+        end
       end
 
       # Checks whether a password is needed or not. For validations only.
@@ -83,7 +97,7 @@ module Devise
       private
         def has_uniqueness_validation_of_login?
           validators.any? do |validator|
-            validator.class.name =~ /::Validations::UniquenessValidator$/) &&
+            validator.class.name =~ /::Validations::UniquenessValidator$/ &&
               validator.attributes.include?(login_attribute)
           end
         end

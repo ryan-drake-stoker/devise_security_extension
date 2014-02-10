@@ -12,6 +12,15 @@ module Devise
   @@expire_password_after = 3.months
 
   # Validate password for strongness
+  # Allow to validate single regex as :
+  #   config.password_regex = /[a-z]/
+  #   I18n error message : active_record.messages.password_length
+  #
+  # or with multiple regexp and its name (useful for error message)
+  #
+  #   config.password_regex = { should_have_mixed_case_letters: /(?=.*[a-z])(?=.*[A-Z])/, should_have_digits: /(?=.*\d)/ }
+  #   I18n error message : active_record.messages.should_have_mixed_case_letters, active_record.messages.should_have_digits
+  #
   mattr_accessor :password_regex
   @@password_regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])/
 
