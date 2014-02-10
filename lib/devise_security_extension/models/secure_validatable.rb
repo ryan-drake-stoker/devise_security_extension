@@ -36,8 +36,10 @@ module Devise
           end
 
           # extra validations
-          validates :email,    :email  => email_validation if email_validation # use rails_email_validator or similar
-          validates :password, :format => { :with => password_regex, :message => :password_format }, :if => :password_required?
+          if email_validation # use rails_email_validator or similar
+            validates :email,    :email  => email_validation
+          end
+          validate :password_format_should_be_valid, :if => :password_required?
 
           # don't allow use same password
           validate :current_equal_password_validation
@@ -59,6 +61,11 @@ module Devise
 
       protected
 
+      # validates :password, :format => { :with => password_regex, :message => :password_format }
+      def password_format_should_be_valid
+        errors.add(:password, :password_format) unless password =~ self.class.password_regex
+      end
+
       # Checks whether a password is needed or not. For validations only.
       # Passwords are always required if it's a new record, or if the password
       # or confirmation are being set somewhere.
@@ -76,7 +83,7 @@ module Devise
       private
         def has_uniqueness_validation_of_login?
           validators.any? do |validator|
-            validator.kind_of?(ActiveRecord::Validations::UniquenessValidator) &&
+            validator.class.name =~ /::Validations::UniquenessValidator$/) &&
               validator.attributes.include?(login_attribute)
           end
         end
