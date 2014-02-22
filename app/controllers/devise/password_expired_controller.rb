@@ -24,7 +24,7 @@ class Devise::PasswordExpiredController < DeviseController
 
   private
     def resource_params
-      params.require(resource_name)
+      params[resource_name]
     end
 
   def scope
