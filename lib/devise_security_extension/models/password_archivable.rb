@@ -51,7 +51,7 @@ module Devise
         if self.encrypted_password_changed?
           if self.class.password_archiving_count.to_i > 0
             self.old_passwords.create! old_password_params
-            self.old_passwords.order_by([:_id, :desc]).skip(self.class.password_archiving_count).destroy_all
+            self.old_passwords.order_by([:_id, :desc]).skip(self.class.password_archiving_count).each{|p| p.destroy}
           else
             self.old_passwords.destroy_all
           end
